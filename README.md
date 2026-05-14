@@ -3,7 +3,7 @@ update may 13 9pm PST: repo created
     need dorit confirmation
 
     need to check what is python-app.yml 
-    need to check what is branch rules (newest)
+    need to check what is branch rules (done)
 
 Repo for group 58 cs362
 Zhao, William zhaoyife@oregonstate.edu
