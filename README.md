@@ -4,6 +4,7 @@ update may 13 9pm PST: repo created
 
     need to check what is python-app.yml 
     need to check what is branch rules (done)
+        test branch rules
 
 Repo for group 58 cs362
 Zhao, William zhaoyife@oregonstate.edu
