@@ -109,4 +109,41 @@ def my_datetime(num_sec):
 
 def conv_endian(num,endian="big"):
     """Takes an integer value and converts to hexadecimal in either big or little endian"""
-    return None
+    #check for valid input
+    if not isinstance(num, int):
+        return None
+    if not (endian == "big" or endian == "little"):
+        return None
+    if num == 0:
+        return "00"
+
+    #check for negative values
+    is_negative = ""
+    if num < 0:
+        is_negative = "-"
+        num = -1*num
+    
+    return is_negative + _make_string(num,endian)
+
+
+def _make_byte(num):
+    """Creates a single byte of information for a given number"""
+    hexa_characters = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F']
+    byte = hexa_characters[num%16]
+    num = num//16
+    byte = hexa_characters[num%16] + byte
+    return byte
+
+def _make_string(num,endian):
+    """Recurvisely creates a string of bytes given a number and endian format"""
+    new_num = num//16//16
+    if num == 0: #actually wondering if this is necessary
+        #theoretically this should never get called with 0
+        return ""
+    if new_num == 0:
+        return _make_byte(num)
+    if endian == "big":
+        return _make_string(new_num,endian) + " " + _make_byte(num)
+    else:
+        return _make_byte(num) + " " + _make_string(new_num,endian)
+        
