@@ -9,7 +9,7 @@ def conv_num(num_str):
     is_negative = False
 
     # Optional leading sign
-    if num_str[0] == '-':
+    if num_str[0] == "-":
         is_negative = True
         idx = 1
         if idx == len(num_str):  # string was just "-"
@@ -19,7 +19,7 @@ def conv_num(num_str):
     body = num_str[idx:]
 
     # Hex path: must start with 0x or 0X
-    if len(body) >= 2 and body[0] == '0' and (body[1] == 'x' or body[1] == 'X'):
+    if len(body) >= 2 and body[0] == "0" and (body[1] == "x" or body[1] == "X"):
         # Hex cannot have any decimal point, but _parse_hex will catch invalid chars anyway
         hex_body = body[2:]
         return _parse_hex(hex_body, is_negative)
@@ -27,16 +27,18 @@ def conv_num(num_str):
     # Decimal path (int or float)
     return _parse_decimal(body, is_negative)
 
+
 def _hex_char_value(ch):
     """Return integer value of a single hex digit or None if invalid."""
-    if '0' <= ch <= '9':
-        return ord(ch) - ord('0')
+    if "0" <= ch <= "9":
+        return ord(ch) - ord("0")
     # Normalize to lowercase for alpha digits
-    if 'A' <= ch <= 'F':
-        return 10 + (ord(ch) - ord('A'))
-    if 'a' <= ch <= 'f':
-        return 10 + (ord(ch) - ord('a'))
+    if "A" <= ch <= "F":
+        return 10 + (ord(ch) - ord("A"))
+    if "a" <= ch <= "f":
+        return 10 + (ord(ch) - ord("a"))
     return None
+
 
 def _parse_decimal(num_body, is_negative):
     # num_body has no sign and no '0x' prefix
@@ -45,24 +47,24 @@ def _parse_decimal(num_body, is_negative):
 
     dot_count = 0
     for ch in num_body:
-        if ch == '.':
+        if ch == ".":
             dot_count += 1
             if dot_count > 1:
                 return None
-        elif not ('0' <= ch <= '9'):
+        elif not ("0" <= ch <= "9"):
             return None
 
     # If no decimal point, parse as integer
     if dot_count == 0:
         value = 0
         for ch in num_body:
-            value = value * 10 + (ord(ch) - ord('0'))
+            value = value * 10 + (ord(ch) - ord("0"))
         if is_negative:
             value = -value
         return value
 
     # There is exactly one decimal point: parse as float
-    dot_index = num_body.find('.')
+    dot_index = num_body.find(".")
     int_part_str = num_body[:dot_index]
     frac_part_str = num_body[dot_index + 1:]
 
@@ -71,7 +73,7 @@ def _parse_decimal(num_body, is_negative):
     if int_part_str:
         for ch in int_part_str:
             # just accumulate
-            int_value = int_value * 10 + (ord(ch) - ord('0'))
+            int_value = int_value * 10 + (ord(ch) - ord("0"))
 
     # fractional part
     frac_value = 0.0
@@ -79,12 +81,13 @@ def _parse_decimal(num_body, is_negative):
     if frac_part_str:
         for ch in frac_part_str:
             divisor *= 10.0
-            frac_value += (ord(ch) - ord('0')) / divisor
+            frac_value += (ord(ch) - ord("0")) / divisor
 
     total = int_value + frac_value
     if is_negative:
         total = -total
     return total
+
 
 def _parse_hex(num_body, is_negative):
     # num_body is the part after 0x/0X
@@ -102,14 +105,81 @@ def _parse_hex(num_body, is_negative):
         value = -value
     return value
 
+
+def _is_leap_year(year):
+    """return boolean True/False for a int number if its a leap year"""
+    if year % 400 == 0:
+        return True
+    if year % 100 == 0:
+        return False
+    if year % 4 == 0:
+        return True
+    return False
+
+
+def _seconds_to_days(num_sec):
+    "return days from senconds since epoch"
+    return num_sec // 86400
+
+
+def _get_year_and_day_of_year(total_days):
+    "convert total days since epoch as int day number, return int year and int total days"
+    year = 1970
+
+    while True:
+        if _is_leap_year(year):
+            days_in_year = 366
+        else:
+            days_in_year = 365
+
+        if total_days >= days_in_year:
+            total_days -= days_in_year
+            year += 1
+        else:
+            break
+
+    return year, total_days
+
+
+def _get_month_and_day(year, day_of_year):
+    """Convert day of year into month and day for the given year."""
+    month_days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+
+    if _is_leap_year(year):
+        month_days[1] = 29
+
+    month = 1
+
+    for days_in_month in month_days:
+        if day_of_year >= days_in_month:
+            day_of_year -= days_in_month
+            month += 1
+        else:
+            break
+
+    day = day_of_year + 1
+
+    return month, day
+
+
+def _format_date(month, day, year):
+    """Convert month, day, and year into MM-DD-YYYY string format."""
+    return f"{month:02d}-{day:02d}-{year}"
+
+
 def my_datetime(num_sec):
     """Takes integer value that represents number of seconds since epoch
     returns string of that date MM-DD-YYYY"""
-    return None
+    total_days = _seconds_to_days(num_sec)
+    year, day_of_year = _get_year_and_day_of_year(total_days)
+    month, day = _get_month_and_day(year, day_of_year)
 
-def conv_endian(num,endian="big"):
+    return _format_date(month, day, year)
+
+
+def conv_endian(num, endian="big"):
     """Takes an integer value and converts to hexadecimal in either big or little endian"""
-    #check for valid input
+    # check for valid input
     if not isinstance(num, int):
         return None
     if not (endian == "big" or endian == "little"):
@@ -117,33 +187,50 @@ def conv_endian(num,endian="big"):
     if num == 0:
         return "00"
 
-    #check for negative values
+    # check for negative values
     is_negative = ""
     if num < 0:
         is_negative = "-"
-        num = -1*num
-    
-    return is_negative + _make_string(num,endian)
+        num = -1 * num
+
+    return is_negative + _make_string(num, endian)
 
 
 def _make_byte(num):
     """Creates a single byte of information for a given number"""
-    hexa_characters = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F']
-    byte = hexa_characters[num%16]
-    num = num//16
-    byte = hexa_characters[num%16] + byte
+    hexa_characters = [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+    ]
+    byte = hexa_characters[num % 16]
+    num = num // 16
+    byte = hexa_characters[num % 16] + byte
     return byte
 
-def _make_string(num,endian):
+
+def _make_string(num, endian):
     """Recurvisely creates a string of bytes given a number and endian format"""
-    new_num = num//16//16
-    if num == 0: #actually wondering if this is necessary
-        #theoretically this should never get called with 0
+    new_num = num // 16 // 16
+    if num == 0:  # actually wondering if this is necessary
+        # theoretically this should never get called with 0
         return ""
     if new_num == 0:
         return _make_byte(num)
     if endian == "big":
-        return _make_string(new_num,endian) + " " + _make_byte(num)
+        return _make_string(new_num, endian) + " " + _make_byte(num)
     else:
-        return _make_byte(num) + " " + _make_string(new_num,endian)
-        
+        return _make_byte(num) + " " + _make_string(new_num, endian)
