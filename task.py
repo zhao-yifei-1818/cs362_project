@@ -102,10 +102,81 @@ def _parse_hex(num_body, is_negative):
         value = -value
     return value
 
+
+def _is_leap_year(year):
+    """return boolean True/False for a int number if its a leap year"""
+    if year % 400 == 0:
+        return True
+    if year % 100 == 0:
+        return False
+    if year % 4 == 0:
+        return True
+    return False
+
+
+def _seconds_to_days(num_sec):
+    'return days from senconds since epoch'
+    return num_sec // 86400
+
+
+def _get_year_and_day_of_year(total_days):
+    'convert total days since epoch as int day number, return int year and int total days'
+    year = 1970
+
+    while True:
+        if _is_leap_year(year):
+            days_in_year = 366
+        else:
+            days_in_year = 365
+
+        if total_days >= days_in_year:
+            total_days -= days_in_year
+            year += 1
+        else:
+            break
+
+    return year, total_days
+
+
+def _get_month_and_day(year, day_of_year):
+    """Convert day of year into month and day for the given year."""
+    month_days = [
+        31, 28, 31, 30,
+        31, 30, 31, 31,
+        30, 31, 30, 31
+    ]
+
+    if _is_leap_year(year):
+        month_days[1] = 29
+
+    month = 1
+
+    for days_in_month in month_days:
+        if day_of_year >= days_in_month:
+            day_of_year -= days_in_month
+            month += 1
+        else:
+            break
+
+    day = day_of_year + 1
+
+    return month, day
+
+
+def _format_date(month, day, year):
+    """Convert month, day, and year into MM-DD-YYYY string format."""
+    return f"{month:02d}-{day:02d}-{year}"
+
+
 def my_datetime(num_sec):
     """Takes integer value that represents number of seconds since epoch
     returns string of that date MM-DD-YYYY"""
-    return None
+    total_days = _seconds_to_days(num_sec)
+    year, day_of_year = _get_year_and_day_of_year(total_days)
+    month, day = _get_month_and_day(year, day_of_year)
+
+    return _format_date(month, day, year)
+
 
 def conv_endian(num,endian="big"):
     """Takes an integer value and converts to hexadecimal in either big or little endian"""
